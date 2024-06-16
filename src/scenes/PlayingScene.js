@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import Player from "../characters/Player";
 import { setBackground } from "../utils/backgroundManager";
+import Config from "../Config";
 
 export default class PlayingScene extends Phaser.Scene {
     constructor() {
@@ -29,6 +30,8 @@ export default class PlayingScene extends Phaser.Scene {
         // player를 m_player라는 멤버 변수로 추가합니다.
         this.m_player = new Player(this);
 
+        this.cameras.main.startFollow(this.m_player)
+
         // PlayingScene의 background를 설정합니다.
         setBackground(this, "background1");
 
@@ -37,6 +40,12 @@ export default class PlayingScene extends Phaser.Scene {
 
     update() {
         this.movePlayerManager();
+
+        this.m_background.setX(this.m_player.x - Config.width / 2)
+        this.m_background.setY(this.m_player.y - Config.height / 2)
+
+        this.m_background.tilePositionX = this.m_player.x - Config.width / 2
+        this.m_background.tilePositionY = this.m_player.y - Config.height / 2
     }
 
     movePlayerManager() {
