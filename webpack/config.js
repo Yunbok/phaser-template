@@ -1,9 +1,14 @@
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const path = require("path");
+const dotenv = require('dotenv');
 const webpack = require("webpack");
 
-module.exports = {
+module.exports = () => {
+
+    dotenv.config()
+
+    return {
     mode: "development",
     devtool: "eval-source-map",
     entry: "./src/main.js",
@@ -25,7 +30,7 @@ module.exports = {
                 use: "raw-loader"
             },
             {
-                test: /\.(gif|png|jpe?g|svg|xml|glsl)$/i,
+                test: /\.(gif|png|jpe?g|svg|xml|mp3|ogg)$/i,
                 use: "file-loader"
             }
         ]
@@ -48,4 +53,4 @@ module.exports = {
             template: "./index.html"
         })
     ]
-};
+}};
