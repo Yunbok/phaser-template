@@ -30,7 +30,7 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
     setVelocity() {
         if (!this.scene.m_closest) {
-            this.setVelocityY(-250);
+            this.setVelocityY(-2050);
             return
         }
         const _x = this.scene.m_closest.x - this.x;
@@ -49,9 +49,9 @@ export default class Player extends Phaser.Physics.Arcade.Sprite {
 
         );
 
-        this.rotation = angleToMob;
+        // this.rotation = angleToMob;
         // this.rotation = angleToMob + Math.PI;
-        // this.rotation = angleToMob + Math.PI / 2 + Math.PI / 4;
+        this.rotation = angleToMob + Math.PI / 2 + Math.PI / 4;
 
         this.body.setAngularVelocity(0);
     }
