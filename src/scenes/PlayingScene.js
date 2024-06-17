@@ -2,6 +2,8 @@ import Phaser from "phaser";
 import Config from "../Config";
 import Player from "../characters/Player";
 import Mob from "../characters/Mob";
+import TopBar from "../ui/TopBar";
+import ExpBar from "../ui/ExpBar";
 import { setBackground } from "../utils/backgroundManager";
 import { addMobEvent } from "../utils/mobManager";
 import { addAttackEvent } from "../utils/attackManager";
@@ -76,16 +78,28 @@ export default class PlayingScene extends Phaser.Scene {
 
         // mob이 static 공격에 부딪혓을 경우 mob에 해당 공격의 데미지만큼 데미지를 줍니다.
         // (Mob.js에서 hitByStatic 함수 확인)
+        // this.physics.add.overlap(
+        //     this.m_weaponStatic,
+        //     this.m_mobs,
+        //     (weapon, mob) => {
+        //         mob.hitByStatic(weapon.m_damage);
+        //     },
+        //     null,
+        //     this
+        // );
+
+
+        this.m_expUps = this.physics.add.group();
         this.physics.add.overlap(
-            this.m_weaponStatic,
-            this.m_mobs,
-            (weapon, mob) => {
-                mob.hitByStatic(weapon.m_damage);
-            },
+            this.m_player,
+            this.m_expUps,
+            this.pickExpUp,
             null,
             this
         );
 
+        this.m_topBar = new TopBar(this);
+        this.m_expBar = new ExpBar(this, 50);
     }
 
     update() {
@@ -140,5 +154,14 @@ export default class PlayingScene extends Phaser.Scene {
         }
         this.m_player.move(vector);
 
+    }
+
+    pickExpUp(player, expUp) {
+        expUp.disableBody(true, true);
+        expUp.destroy();
+
+        this.m_expUpSound.play();
+        // console.log(`경험치 ${expUp.m_exp} 상승!`)
+        this.m_expBar.increase(expUp.m_exp);
     }
 }
