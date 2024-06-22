@@ -5,8 +5,9 @@ import Mob from "../characters/Mob";
 import TopBar from "../ui/TopBar";
 import ExpBar from "../ui/ExpBar";
 import { setBackground } from "../utils/backgroundManager";
-import { addMobEvent } from "../utils/mobManager";
-import { addAttackEvent } from "../utils/attackManager";
+import { addMobEvent, removeOldestMobEvent } from "../utils/mobManager";
+import { setAttackScale, setAttackDamage, addAttackEvent } from "../utils/attackManager"
+import { pause } from "../utils/pauseManager";
 
 export default class PlayingScene extends Phaser.Scene {
     constructor() {
@@ -100,6 +101,15 @@ export default class PlayingScene extends Phaser.Scene {
 
         this.m_topBar = new TopBar(this);
         this.m_expBar = new ExpBar(this, 50);
+
+        this.input.keyboard.on(
+            "keydown-ESC",
+            () => { pause(this, "pause"); },
+            this
+        );
+
+        // 맨 처음 추가될 공격은 create 메소드 내에서 추가해줍니다.
+        addAttackEvent(this, "claw", 10, 2.3, 1500);
     }
 
     update() {
@@ -154,6 +164,12 @@ export default class PlayingScene extends Phaser.Scene {
         }
         this.m_player.move(vector);
 
+        this.m_player.move(vector);
+        // static 공격들은 player가 이동하면 그대로 따라오도록 해줍니다.
+        this.m_weaponStatic.children.each(weapon => {
+            weapon.move(vector);
+        }, this);
+
     }
 
     pickExpUp(player, expUp) {
@@ -163,5 +179,47 @@ export default class PlayingScene extends Phaser.Scene {
         this.m_expUpSound.play();
         // console.log(`경험치 ${expUp.m_exp} 상승!`)
         this.m_expBar.increase(expUp.m_exp);
+        if (this.m_expBar.m_currentExp >= this.m_expBar.m_maxExp) {
+            // maxExp를 초과하면 레벨업을 해주던 기존의 코드를 지우고
+            // afterLevelUp 메소드를 만들어 거기에 옮겨줍니다.
+            // 추후 레벨에 따른 몹, 무기 추가를 afterLevelUp에서 실행해 줄 것입니다.
+            pause(this, "levelup");
+        }
+    }
+
+    afterLevelUp() {
+        this.m_topBar.gainLevel();
+
+        switch (this.m_topBar.m_level) {
+            case 2:
+                removeOldestMobEvent(this);
+                addMobEvent(this, 1000, "mob2", "mob2_anim", 20, 0.8);
+                // claw 공격 크기 확대
+                setAttackScale(this, "claw", 4);
+                break;
+            case 3:
+                removeOldestMobEvent(this);
+                addMobEvent(this, 1000, "mob3", "mob3_anim", 30, 0.7);
+                // catnip 공격 추가
+                addAttackEvent(this, "catnip", 10, 2);
+                break;
+            case 4:
+                removeOldestMobEvent(this);
+                addMobEvent(this, 1000, "mob4", "mob4_anim", 40, 0.7);
+                // catnip 공격 크기 확대
+                setAttackScale(this, "catnip", 3);
+                break;
+            case 5:
+                // claw 공격 삭제
+                removeAttack(this, "claw");
+                // beam 공격 추가
+                addAttackEvent(this, "beam", 10, 1, 1000);
+                break;
+            case 6:
+                // beam 공격 크기 및 데미지 확대
+                setAttackScale(this, "beam", 2);
+                setAttackDamage(this, "beam", 40);
+                break;
+        }
     }
 }

@@ -15,7 +15,7 @@ export function addMobEvent(scene, repeatGap, mobTexture, mobAnim, mobHp, mobDro
     scene.m_mobEvents.push(timer);
 }
 
-export function removeOldstMobEvent(scene) {
-    scene.m_mobEvents[0].return();
+export function removeOldestMobEvent(scene) {
+    scene.m_mobEvents[0].remove();
     scene.m_mobEvents.shift();
 }
